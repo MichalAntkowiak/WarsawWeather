@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import requests
 from datetime import datetime
 
 class WarsawWeatherApp:
@@ -36,7 +37,7 @@ class WarsawWeatherApp:
         subtitle_label.pack(anchor=tk.W)
 
         # --- GŁÓWNY PANEL POGODOWY ---
-        self.display_panel = tk.Frame(self.root, bg=self.bg_box, bd=1, relief=tk.SOLID, highlightbackground=self.border_color_fallback(), highlightthickness=1)
+        self.display_panel = tk.Frame(self.root, bg=self.bg_box, bd=1, relief=tk.SOLID, highlightbackground="#1e1e26", highlightthickness=1)
         self.display_panel.pack(padx=25, pady=10, fill=tk.BOTH)
         
         # Temperatura i Lokalizacja
@@ -93,13 +94,13 @@ class WarsawWeatherApp:
 
     def fetch_weather_data(self):
         self.log_to_terminal("weather_monitor.py: Inicjalizacja połączenia ze stacją OpenWeather...")
-        self.log_to_terminal("API: Nawiązywanie połączenia z serwerem danych współrzędnych...")
+        self.log_to_terminal("API: Nawiązywanie połączenia z serwerem danych...")
         
-        # Współrzędne geograficzne Warszawy
         url = "https://api.open-meteo.com/v1/forecast?latitude=52.2297&longitude=21.0122&current=temperature_2m,relative_humidity_2m,surface_pressure,wind_speed_10m"
         
         try:
-            response = requests.get(url, timeout=5)
+            # Ustalamy sztywny, krótki timeout (2 sekundy), aby program nie wisiał w nieskończoność
+            response = requests.get(url, timeout=2)
             if response.status_code == 200:
                 data = response.json()
                 current = data["current"]
@@ -108,7 +109,6 @@ class WarsawWeatherApp:
                 humidity = current["relative_humidity_2m"]
                 wind = current["wind_speed_10m"]
                 
-                # Aktualizacja komponentów GUI
                 self.temp_label.config(text=f"{temp}°C")
                 self.status_val.config(text="Słonecznie / Ciepło" if temp > 14 else "Umiarkowane zachmurzenie")
                 self.press_val.config(text=f"{pressure} hPa")
@@ -121,18 +121,15 @@ class WarsawWeatherApp:
                 raise requests.exceptions.RequestException
                 
         except (requests.exceptions.RequestException, KeyError):
-            # Warstwa Fallback w przypadku braku internetu (identyczna z logiką na Twojej stronie)
+            # Natychmiastowe podstawienie danych awaryjnych (13 stopni), jeśli sieć/firewall blokuje pakiet
             self.temp_label.config(text="13°C")
             self.status_val.config(text="Bezchmurnie")
             self.press_val.config(text="1015 hPa")
             self.humid_val.config(text="58 %")
             self.wind_val.config(text="3.8 m/s")
             
-            self.log_to_terminal("WARN: API offline layer triggered. Błąd połączenia.")
+            self.log_to_terminal("WARN: Oczekiwanie na odpowiedź serwera przerwane (Timeout).")
             self.log_to_terminal("WARN: Uruchomiono warstwę pamięci podręcznej. Skalibrowano do 13°C.")
-
-    def border_color_fallback(self):
-        return "#1e1e26"
 
 if __name__ == "__main__":
     root = tk.Tk()
