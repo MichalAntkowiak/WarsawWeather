@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-import requests
 from datetime import datetime
 
 class WarsawWeatherApp:
@@ -66,7 +65,7 @@ class WarsawWeatherApp:
         term_label = tk.Label(terminal_frame, text="KONSOLA WYJŚCIOWA (LOGI API):", font=("Consolas", 8, "bold"), fg=self.text_dark, bg=self.bg_base)
         term_label.pack(anchor=tk.W, pady=(0, 5))
         
-        self.terminal_text = tk.Text(terminal_frame, bg=self.bg_terminal, fg=self.text_green, font=("Consolas", 8), bd=1, relief=tk.SOLID, inset=10)
+        self.terminal_text = tk.Text(terminal_frame, bg=self.bg_terminal, fg=self.text_green, font=("Consolas", 8), bd=1, relief=tk.SOLID, padx=10, pady=10)
         self.terminal_text.pack(fill=tk.BOTH, expand=True)
         
         # Przycisk odświeżania
